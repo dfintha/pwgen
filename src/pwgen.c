@@ -87,14 +87,12 @@ int main(int argc, char **argv) {
 }
 
 static void process_params(int argc, char **argv, env_t *flags) {
-    if (argv == NULL) {
+    if (argv == NULL)
         return;
-    }
 
     for (int i = 0; i < argc; ++i) {
-        if (argv[i] == NULL || argv[i][0] != '-') {
+        if (argv[i] == NULL || argv[i][0] != '-')
             continue;
-        }
 
         switch (argv[i][1]) {
             case 'n':
@@ -123,9 +121,8 @@ static void process_params(int argc, char **argv, env_t *flags) {
                         handle_flag('N', has_numbers, false);
                         handle_flag('S', has_specials, false);
                         handle_flag('W', no_warning, true);
-                        handle_flag('H', show_help, true);
 
-                        // --help triggers this
+                        handle_flag('H', show_help, true);
                         handle_flag('h', show_help, true);
 
                         #undef handle_flag
