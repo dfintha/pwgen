@@ -5,7 +5,7 @@
 #include <stdlib.h>     // free, malloc
 #include <string.h>     // memset
 #include <unistd.h>     // close, read
-#include "messages.h"    // localizable messages
+#include "messages.h"   // localizable messages
 
 typedef void * (*memset_ptr)(void *, int, size_t);
 
