@@ -5,6 +5,7 @@
 #include <stdlib.h>     // free, malloc
 #include <string.h>     // memset
 #include <unistd.h>     // close, read
+#include "messages.h"    // localizable messages
 
 typedef void * (*memset_ptr)(void *, int, size_t);
 
@@ -20,7 +21,6 @@ typedef struct {
 
 static void process_params(int argc, char **argv, env_t *flags);
 static bool is_valid(char c, const env_t *flags);
-static void show_help(void);
 
 int main(int argc, char **argv) {
     env_t environment = {
@@ -36,40 +36,31 @@ int main(int argc, char **argv) {
     process_params(--argc, ++argv, &environment);
 
     if (environment.show_help) {
-        show_help();
+        puts(info_help_message);
         return 0;
     }
 
     if (!environment.no_warning) {
-        if (environment.length < 16) {
-            fprintf(stderr, "security warning: passwords under 16 characters "
-                            "long are not considered secure, consider "
-                            "generating longer passwords\n");
-        }
+        if (environment.length < 16)
+            fputs(warn_short_pw, stderr);
 
-        if (!environment.has_numbers) {
-            fprintf(stderr, "security warning: not including numbers into "
-                            "passwords makes them considerably easier to "
-                            "crack, consider using numbers in passwords\n");
-        }
+        if (!environment.has_numbers)
+            fputs(warn_no_numbers, stderr);
 
-        if (!environment.has_lowercase) {
-            fprintf(stderr, "security warning: using case-insensitive "
-                            "passwords makes them considerably easier to "
-                            "crack, consider using lowercase letters, too\n");
-        }
+        if (!environment.has_lowercase)
+            fputs(warn_no_lowercase, stderr);
     }
 
     int urandom = open("/dev/urandom", O_RDONLY);
     if (urandom == -1) {
-        fprintf(stderr, "error: can't get file descriptor to urandom\n");
+        fputs(err_fd_urandom, stderr);
         return 1;
     }
 
 
     char* buffer = malloc(environment.length + 1);
     if (buffer == NULL) {
-        fprintf(stderr, "error: could not allocate memory on the heap\n");
+        fputs(err_memory_alloc, stderr);
         close(urandom);
         return 1;
     }
@@ -85,7 +76,7 @@ int main(int argc, char **argv) {
             buffer[l] = current;
         }
 
-        printf("%s\n", buffer);
+        puts(buffer);
     }
 
     close(urandom);
@@ -109,15 +100,15 @@ static void process_params(int argc, char **argv, env_t *flags) {
             case 'n':
             case 'l':
                 {
-                    size_t *where = (argv[i][1] == 'n') ? &flags->amount
-                                                        : &flags->length;
+                    size_t * const env = (argv[i][1] == 'n') ? &flags->amount
+                                                             : &flags->length;
                     const int len = strlen(argv[i]);
                     for (int j = 2; j < len; ++j) {
                         argv[i][j - 2] = argv[i][j];
                     }
                     argv[i][len - 2] = '\0';
 
-                    *where = (size_t) atoi(argv[i]);
+                    *env = (size_t) atoi(argv[i]);
                 }
                 break;
 
@@ -145,26 +136,6 @@ static void process_params(int argc, char **argv, env_t *flags) {
     }
 }
 
-static void show_help(void) {
-    printf("usage: pwgen [OPTIONS]\n"
-           "Generate passwords with specified complexity.\n"
-           "\n"
-           "  -nN       generate N passwords\n"
-           "  -lN       generated passwords are N characters long\n"
-           "  -L        exclude lowercase characters\n"
-           "  -N        exclude numbers\n"
-           "  -S        exclude special characters\n"
-           "  -W        disable warnings for weak passwords\n"
-           "  -H, -h    show this help and don't generate any passwords\n"
-           "\n"
-           "Warnings are issued for weak passwords, if the specified length\n"
-           "is smaller than 16 characters, or if lowercase characters or \n"
-           "numbers are excluded from the passwords.\n"
-           "\n"
-           "By default, one password is generated, which is 16 characters\n"
-           "long, and includes all possible character types.\n");
-}
-
 static bool is_valid(char c, const env_t *flags) {
     if (!isprint(c) || !isgraph(c) || iscntrl(c))
         return false;
@@ -180,3 +151,4 @@ static bool is_valid(char c, const env_t *flags) {
 
     return true;
 }
+
