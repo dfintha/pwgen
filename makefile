@@ -21,7 +21,7 @@ all: $(BINARY)
 
 loc:
 	@printf "%s[ Lines ]%s " "$(BLD)$(YLW)" $(NRM)
-	@cat src/*.c src/*.h | wc -l
+	@cat src/*| wc -l
 
 $(BINARY): $(OBJECTS)
 	@mkdir -p bin
