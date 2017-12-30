@@ -34,7 +34,7 @@ $(BINARY): $(OBJECTS)
 obj/%.o: src/%.c $(HEADERS)
 	@mkdir -p obj
 	@printf "%s[Compile]%s $<\n" "$(BLD)$(BLU)" $(NRM)
-	@$(CC) $(CXXFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	@printf "%s[ Clean ]%s bin\n" "$(BLD)$(RED)" $(NRM)
