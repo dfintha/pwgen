@@ -17,6 +17,7 @@ typedef struct {
     bool has_lowercase;
     bool no_warning;
     bool show_help;
+    char *excluded;
 } env_t;
 
 static void process_params(int argc, char **argv, env_t *flags);
@@ -30,7 +31,8 @@ int main(int argc, char **argv) {
         .has_numbers = true,
         .has_lowercase = true,
         .no_warning = false,
-        .show_help = false
+        .show_help = false,
+        .excluded = NULL
     };
 
     process_params(--argc, ++argv, &environment);
@@ -82,6 +84,8 @@ int main(int argc, char **argv) {
     close(urandom);
     volatile memset_ptr memset_noopt = memset;
     memset_noopt(buffer, 0, environment.length);
+    if (environment.excluded != NULL)
+        free(environment.excluded);
     free(buffer);
     return 0;
 }
@@ -110,6 +114,27 @@ static void process_params(int argc, char **argv, env_t *flags) {
                 }
                 break;
 
+            case 'E':
+                {
+                    if (argv[i][2] != '=')
+                        continue;
+
+                    const char *exc = argv[i] + 3;
+                    if (flags->excluded == NULL) {
+                        size_t len = strlen(exc) + 1;
+                        flags->excluded = (char *) malloc(len);
+                        strcpy(flags->excluded, exc);
+                    } else {
+                        char *old = flags->excluded;
+                        size_t len = strlen(exc) + 
+                                     strlen(flags->excluded) + 1;
+                        flags->excluded = (char *) malloc(len);
+                        strcpy(flags->excluded, old);
+                        free(old);
+                        strcat(flags->excluded, exc);
+                    }
+                }
+                break;
 
             default:
                 {
@@ -145,6 +170,13 @@ static bool is_valid(char c, const env_t *flags) {
 
     if (!flags->has_specials && !isalnum(c)) 
         return false;
+
+    if (flags->excluded != NULL) {
+        for (unsigned i = 0; i < strlen(flags->excluded); ++i) {
+            if (c == flags->excluded[i])
+                return false;
+        }
+    }
 
     return true;
 }
