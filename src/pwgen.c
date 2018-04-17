@@ -1,11 +1,11 @@
-#include <ctype.h>      // character class checks
-#include <fcntl.h>      // open
-#include <stdbool.h>    // bool
-#include <stdio.h>      // fprintf, printf
-#include <stdlib.h>     // free, malloc
-#include <string.h>     // memset
-#include <unistd.h>     // close, read
-#include "messages.h"   // localizable messages
+#include <ctype.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "messages.h"
 
 typedef void * (*memset_ptr)(void *, int, size_t);
 
@@ -159,16 +159,18 @@ static void process_params(int argc, char **argv, env_t *flags) {
 }
 
 static bool is_valid(char c, const env_t *flags) {
-    if (!isprint(c) || !isgraph(c) || iscntrl(c))
+    const int cc = c;
+
+    if (!isprint(cc) || !isgraph(cc) || iscntrl(cc))
         return false;
 
-    if (!flags->has_numbers && isdigit(c))
+    if (!flags->has_numbers && isdigit(cc))
         return false;
 
-    if (!flags->has_lowercase && isalpha(c) && islower(c))
+    if (!flags->has_lowercase && isalpha(cc) && islower(cc))
         return false;
 
-    if (!flags->has_specials && !isalnum(c)) 
+    if (!flags->has_specials && !isalnum(cc))
         return false;
 
     if (flags->excluded != NULL) {
