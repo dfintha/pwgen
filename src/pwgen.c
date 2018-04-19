@@ -31,6 +31,21 @@ int main(int argc, char **argv) {
         return 0;
     }
 
+    if (environment.excluded != NULL) {
+        bool deadlock = true;
+        for (int i = 0; i < 256; ++i) {
+            if (is_valid ((char) i, &environment)) {
+                deadlock = false;
+                break;
+            }
+        }
+        if (deadlock) {
+            fputs(err_deadlock, stderr);
+            free(environment.excluded);
+            return 1;
+        }
+    }
+
     if (!environment.no_warning) {
         if (environment.length < 16)
             fputs(warn_short_pw, stderr);

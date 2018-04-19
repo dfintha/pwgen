@@ -16,6 +16,9 @@ static const char err_fd_urandom[] =
 static const char err_memory_alloc[] = 
     "error: can't allocate memory on the heap\n";
 
+static const char err_deadlock[] = 
+    "error: no possible characters left, try excluding less\n";
+
 static const char info_help_message[] =
     "usage: pwgen [OPTIONS]\n"
     "Generate passwords with specified complexity.\n"
