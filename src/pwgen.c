@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
     }
 
 
-    char* buffer = malloc(environment.length + 1);
+    char* buffer = (char *) malloc(environment.length + 1);
     if (buffer == NULL) {
         fputs(err_memory_alloc, stderr);
         close(urandom);
