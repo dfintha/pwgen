@@ -22,6 +22,7 @@ typedef struct {
 
 static env_t process_params(int argc, char **argv);
 static bool is_valid(char c, const env_t *flags);
+static bool test_deadlock(const env_t *flags);
 
 int main(int argc, char **argv) {
     env_t environment = process_params(--argc, ++argv);
@@ -31,19 +32,10 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    if (environment.excluded != NULL) {
-        bool deadlock = true;
-        for (int i = 0; i < 256; ++i) {
-            if (is_valid ((char) i, &environment)) {
-                deadlock = false;
-                break;
-            }
-        }
-        if (deadlock) {
-            fputs(err_deadlock, stderr);
-            free(environment.excluded);
-            return 1;
-        }
+    if (test_deadlock (&environment)) {
+        fputs(err_deadlock, stderr);
+        free(environment.excluded);
+        return 1;
     }
 
     if (!environment.no_warning) {
@@ -200,3 +192,17 @@ static bool is_valid(char c, const env_t *flags) {
     return true;
 }
 
+static bool test_deadlock(const env_t *flags) {
+    if (flags->excluded != NULL) {
+        bool deadlock = true;
+        for (int i = 0; i < 256; ++i) {
+            if (is_valid ((char) i, flags)) {
+                deadlock = false;
+                break;
+            }
+        }
+        return deadlock;
+    }
+
+    return false;
+}
