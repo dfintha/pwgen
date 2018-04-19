@@ -20,22 +20,11 @@ typedef struct {
     char *excluded;
 } env_t;
 
-static void process_params(int argc, char **argv, env_t *flags);
+static env_t process_params(int argc, char **argv);
 static bool is_valid(char c, const env_t *flags);
 
 int main(int argc, char **argv) {
-    env_t environment = {
-        .length = 16,
-        .amount = 1,
-        .has_specials = true,
-        .has_numbers = true,
-        .has_lowercase = true,
-        .no_warning = false,
-        .show_help = false,
-        .excluded = NULL
-    };
-
-    process_params(--argc, ++argv, &environment);
+    env_t environment = process_params(--argc, ++argv);
 
     if (environment.show_help) {
         puts(info_help_message);
@@ -90,9 +79,20 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-static void process_params(int argc, char **argv, env_t *flags) {
+static env_t process_params(int argc, char **argv) {
+    env_t result = {
+        .length = 16,
+        .amount = 1,
+        .has_specials = true,
+        .has_numbers = true,
+        .has_lowercase = true,
+        .no_warning = false,
+        .show_help = false,
+        .excluded = NULL
+    };
+
     if (argv == NULL)
-        return;
+        return result;
 
     for (int i = 0; i < argc; ++i) {
         if (argv[i] == NULL || argv[i][0] != '-')
@@ -102,8 +102,8 @@ static void process_params(int argc, char **argv, env_t *flags) {
             case 'n':
             case 'l':
                 {
-                    size_t * const env = (argv[i][1] == 'n') ? &flags->amount
-                                                             : &flags->length;
+                    size_t * const env = (argv[i][1] == 'n') ? &result.amount
+                                                             : &result.length;
                     const int len = strlen(argv[i]);
                     for (int j = 2; j < len; ++j) {
                         argv[i][j - 2] = argv[i][j];
@@ -120,18 +120,18 @@ static void process_params(int argc, char **argv, env_t *flags) {
                         continue;
 
                     const char *exc = argv[i] + 3;
-                    if (flags->excluded == NULL) {
+                    if (result.excluded == NULL) {
                         size_t len = strlen(exc) + 1;
-                        flags->excluded = (char *) malloc(len);
-                        strcpy(flags->excluded, exc);
+                        result.excluded = (char *) malloc(len);
+                        strcpy(result.excluded, exc);
                     } else {
-                        char *old = flags->excluded;
+                        char *old = result.excluded;
                         size_t len = strlen(exc) + 
-                                     strlen(flags->excluded) + 1;
-                        flags->excluded = (char *) malloc(len);
-                        strcpy(flags->excluded, old);
+                                     strlen(result.excluded) + 1;
+                        result.excluded = (char *) malloc(len);
+                        strcpy(result.excluded, old);
                         free(old);
-                        strcat(flags->excluded, exc);
+                        strcat(result.excluded, exc);
                     }
                 }
                 break;
@@ -140,7 +140,7 @@ static void process_params(int argc, char **argv, env_t *flags) {
                 {
                     for (size_t n = 1; n < strlen(argv[i]); ++n) {
                         #define handle_flag(ch, name, val) \
-                            if (argv[i][n] == ch) flags->name = val
+                            if (argv[i][n] == ch) result.name = val
 
                         handle_flag('L', has_lowercase, false);
                         handle_flag('N', has_numbers, false);
@@ -156,6 +156,8 @@ static void process_params(int argc, char **argv, env_t *flags) {
                 break;
         }
     }
+
+    return result;
 }
 
 static bool is_valid(char c, const env_t *flags) {
