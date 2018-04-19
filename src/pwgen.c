@@ -29,13 +29,13 @@ int main(int argc, char **argv) {
 
     if (environment.show_help) {
         puts(info_help_message);
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     if (test_deadlock (&environment)) {
         fputs(err_deadlock, stderr);
         free(environment.excluded);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (!environment.no_warning) {
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
     int urandom = open("/dev/urandom", O_RDONLY);
     if (urandom == -1) {
         fputs(err_fd_urandom, stderr);
-        return 1;
+        return EXIT_FAILURE;
     }
 
 
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
     if (buffer == NULL) {
         fputs(err_memory_alloc, stderr);
         close(urandom);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     buffer[environment.length] = '\0';
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
     if (environment.excluded != NULL)
         free(environment.excluded);
     free(buffer);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 static env_t process_params(int argc, char **argv) {
