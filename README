@@ -1,0 +1,20 @@
+The pwgen Password Generation Tool
+==================================
+
+This program can generate complex passwords for everyday usage, using the
+urandom device. By default, without any command-line arguments, it generates a
+single, 16 character long password, which can have both upper- and lowercase
+letters, numbers, and symbols.
+
+Functionalities of the software include:
+- Issuing a warning if generated passwords may be insecure.
+- Excluding either lowercase characters, numbers, symbols, or any combination
+  of these.
+- Excluding a specified character set (for example, Y and Z, as they are often
+  at different positions on different keyboards, depending on locale).
+
+For detailed information about the possible command-line arguments, issue the
+"pwgen --help" command (without the quotation marks).
+
+The software is under the MIT License.
+
